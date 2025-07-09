@@ -1,0 +1,10 @@
+{
+  "name": "bot-wa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.6.0",
+    "pino": "^8.0.0"
+  }
+}
