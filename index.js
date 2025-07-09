@@ -1,50 +1,47 @@
-import makeWASocket, {
-  DisconnectReason,
-  fetchLatestBaileysVersion,
-  useMultiFileAuthState
-} from '@whiskeysockets/baileys'
-import { Boom } from '@hapi/boom'
-import pino from 'pino'
-import { makeInMemoryStore } from '@whiskeysockets/baileys'
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys')
+const pino = require('pino')
+const { Boom } = require('@hapi/boom')
+const fs = require('fs')
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+async function startSock() {
+    const { state, saveCreds } = await useMultiFileAuthState('session')
 
-const store = makeInMemoryStore({ logger: pino({ level: 'silent' }) })
+    const { version, isLatest } = await fetchLatestBaileysVersion()
 
-const startSock = async () => {
-  const { state, saveCreds } = await useMultiFileAuthState('./auth_info')
-  const { version } = await fetchLatestBaileysVersion()
-  const sock = makeWASocket({
-    version,
-    printQRInTerminal: true,
-    auth: state,
-    logger: pino({ level: 'silent' })
-  })
+    const sock = makeWASocket({
+        version,
+        printQRInTerminal: true,
+        auth: state,
+        logger: pino({ level: 'silent' })
+    })
 
-  store.bind(sock.ev)
-  sock.ev.on('creds.update', saveCreds)
+    sock.ev.on('creds.update', saveCreds)
 
-  sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
-    if (connection === 'close') {
-      const shouldReconnect =
-        (lastDisconnect?.error instanceof Boom) &&
-        lastDisconnect.error.output?.statusCode !== DisconnectReason.loggedOut
-      if (shouldReconnect) startSock()
-    } else if (connection === 'open') {
-      console.log('✅ Bot is connected!')
-    }
-  })
+    sock.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect } = update
+        if (connection === 'close') {
+            const shouldReconnect = (lastDisconnect.error = Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+            console.log('connection closed due to', lastDisconnect.error, ', reconnecting:', shouldReconnect)
+            if (shouldReconnect) {
+                startSock()
+            }
+        } else if (connection === 'open') {
+            console.log('connection opened')
+        }
+    })
 
-  sock.ev.on('messages.upsert', ({ messages }) => {
-    const msg = messages[0]
-    const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text
-    if (text?.toLowerCase() === 'ping') {
-      sock.sendMessage(msg.key.remoteJid, { text: 'pong' })
-    }
-  })
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+        if (type === 'notify') {
+            const msg = messages[0]
+            const sender = msg.key.remoteJid
+            const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || ''
+            console.log('Pesan masuk dari:', sender, 'Isi:', text)
+
+            if (text.toLowerCase() === 'ping') {
+                await sock.sendMessage(sender, { text: 'pong 🏓' })
+            }
+        }
+    })
 }
 
 startSock()
