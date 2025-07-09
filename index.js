@@ -1,7 +1,8 @@
-import makeWASocket, {
-  DisconnectReason,
+import {
+  default as makeWASocket,
   useMultiFileAuthState,
-  fetchLatestBaileysVersion
+  fetchLatestBaileysVersion,
+  DisconnectReason
 } from "@whiskeysockets/baileys";
 
 import P from "pino";
@@ -21,17 +22,13 @@ async function startSock() {
 
   sock.ev.on("connection.update", (update) => {
     const { connection, lastDisconnect } = update;
-
     if (connection === "close") {
       const shouldReconnect =
         lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-
       console.log("connection closed due to", lastDisconnect?.error, ", reconnecting:", shouldReconnect);
-      if (shouldReconnect) {
-        startSock();
-      }
+      if (shouldReconnect) startSock();
     } else if (connection === "open") {
-      console.log("opened connection");
+      console.log("Bot berhasil terhubung!");
     }
   });
 
@@ -40,7 +37,7 @@ async function startSock() {
       const msg = messages[0];
       if (!msg.key.fromMe) {
         await sock.sendMessage(msg.key.remoteJid, {
-          text: "Halo! Ini bot WhatsApp aktif 🚀",
+          text: "Halo! Ini bot WhatsApp 🚀",
         });
       }
     }
