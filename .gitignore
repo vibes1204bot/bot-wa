@@ -1,3 +1,21 @@
-auth_info/*
-node_modules
-logs
+# Node modules
+node_modules/
+
+# Auth session (jangan pernah upload ini ke GitHub)
+auth_info/
+
+# Log files
+*.log
+
+# Env file (kalau nanti pakai)
+.env
+
+# Mac OS
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Build cache (opsional)
+dist/
+build/
