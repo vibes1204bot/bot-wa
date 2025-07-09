@@ -1,17 +1,17 @@
-# Gunakan Node.js versi 18
+# Gunakan image Node.js versi 18
 FROM node:18
 
-# Buat direktori kerja di dalam container
+# Direktori kerja di dalam container
 WORKDIR /app
 
-# Salin file package.json & package-lock.json (jika ada)
+# Salin file dependency terlebih dahulu untuk caching
 COPY package*.json ./
 
-# Install dependensi
+# Install dependency
 RUN npm install
 
-# Salin semua file ke container
+# Salin semua file ke dalam container
 COPY . .
 
-# Jalankan bot saat container start
+# Jalankan bot
 CMD ["node", "index.js"]
