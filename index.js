@@ -1,16 +1,15 @@
+const { Boom } = require('@hapi/boom');
 const {
   default: makeWASocket,
   useMultiFileAuthState,
   fetchLatestBaileysVersion,
   DisconnectReason
 } = require('@whiskeysockets/baileys');
-
 const pino = require('pino');
-const fs = require('fs');
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info');
-  const { version, isLatest } = await fetchLatestBaileysVersion();
+  const { version } = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
     version,
@@ -21,7 +20,7 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+  sock.ev.on('messages.upsert', async ({ messages }) => {
     const msg = messages[0];
     if (!msg.message || msg.key.fromMe) return;
 
