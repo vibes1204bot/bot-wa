@@ -1,10 +1,5 @@
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion,
-  DisconnectReason
-} = require('@whiskeysockets/baileys');
 const pino = require('pino');
 
 async function startBot() {
@@ -37,7 +32,7 @@ async function startBot() {
     if (connection === 'close') {
       const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
       if (reason !== DisconnectReason.loggedOut) {
-        startBot(); // reconnect
+        startBot(); // Reconnect
       }
     }
   });
