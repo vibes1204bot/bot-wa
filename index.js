@@ -1,42 +1,50 @@
-import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys'
-import { Boom } from '@hapi/boom'
-import pino from 'pino'
+const {
+  default: makeWASocket,
+  DisconnectReason,
+  useMultiFileAuthState,
+  fetchLatestBaileysVersion
+} = require("@whiskeysockets/baileys");
 
-async function startBot() {
-  const { state, saveCreds } = await useMultiFileAuthState('auth_info')
+const P = require("pino");
 
+async function startSock() {
+  const { state, saveCreds } = await useMultiFileAuthState("auth_info");
+
+  const { version } = await fetchLatestBaileysVersion();
   const sock = makeWASocket({
-    auth: state,
+    version,
+    logger: P({ level: "silent" }),
     printQRInTerminal: true,
-    logger: pino({ level: 'silent' })
-  })
+    auth: state,
+  });
 
-  sock.ev.on('creds.update', saveCreds)
+  sock.ev.on("creds.update", saveCreds);
 
-  sock.ev.on('connection.update', (update) => {
-    const { connection, lastDisconnect } = update
-    if (connection === 'close') {
-      const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
-      console.log('connection closed due to', lastDisconnect?.error, ', reconnecting:', shouldReconnect)
+  sock.ev.on("connection.update", (update) => {
+    const { connection, lastDisconnect } = update;
+    if (connection === "close") {
+      const shouldReconnect =
+        lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
+
+      console.log("connection closed due to", lastDisconnect?.error, ", reconnecting:", shouldReconnect);
       if (shouldReconnect) {
-        startBot()
+        startSock();
       }
-    } else if (connection === 'open') {
-      console.log('✅ Bot WhatsApp Terhubung!')
+    } else if (connection === "open") {
+      console.log("opened connection");
     }
-  })
+  });
 
-  sock.ev.on('messages.upsert', async ({ messages }) => {
-    const msg = messages[0]
-    if (!msg.message) return
-    const sender = msg.key.remoteJid
-
-    const text = msg.message.conversation || msg.message.extendedTextMessage?.text
-
-    if (text?.toLowerCase() === 'ping') {
-      await sock.sendMessage(sender, { text: 'pong 🏓' })
+  sock.ev.on("messages.upsert", async ({ messages, type }) => {
+    if (type === "notify") {
+      const msg = messages[0];
+      if (!msg.key.fromMe) {
+        await sock.sendMessage(msg.key.remoteJid, {
+          text: "Halo! Ini adalah bot WhatsApp yang sedang aktif 🚀",
+        });
+      }
     }
-  })
+  });
 }
 
-startBot()
+startSock();
