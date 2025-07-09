@@ -1,16 +1,15 @@
-const {
-  default: makeWASocket,
+import makeWASocket, {
   DisconnectReason,
   useMultiFileAuthState,
   fetchLatestBaileysVersion
-} = require("@whiskeysockets/baileys");
+} from "@whiskeysockets/baileys";
 
-const P = require("pino");
+import P from "pino";
 
 async function startSock() {
   const { state, saveCreds } = await useMultiFileAuthState("auth_info");
-
   const { version } = await fetchLatestBaileysVersion();
+
   const sock = makeWASocket({
     version,
     logger: P({ level: "silent" }),
@@ -22,6 +21,7 @@ async function startSock() {
 
   sock.ev.on("connection.update", (update) => {
     const { connection, lastDisconnect } = update;
+
     if (connection === "close") {
       const shouldReconnect =
         lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
@@ -40,7 +40,7 @@ async function startSock() {
       const msg = messages[0];
       if (!msg.key.fromMe) {
         await sock.sendMessage(msg.key.remoteJid, {
-          text: "Halo! Ini adalah bot WhatsApp yang sedang aktif 🚀",
+          text: "Halo! Ini bot WhatsApp aktif 🚀",
         });
       }
     }
