@@ -1,13 +1,13 @@
 {
   "name": "bot-wa",
   "version": "1.0.0",
-  "description": "WhatsApp bot with Baileys",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
-  "type": "commonjs",
   "dependencies": {
+    "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "^6.7.0",
     "pino": "^8.0.0"
   }
