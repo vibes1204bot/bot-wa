@@ -1,3 +1,13 @@
-"@hapi/boom": "...",
-"pino": "...",
-"qrcode-terminal": "..."
+{
+  "name": "bot-wa",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.18",
+    "@hapi/boom": "^10.0.1",
+    "pino": "^8.0.0"
+  }
+}
