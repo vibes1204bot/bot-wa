@@ -1,13 +1,6 @@
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion,
-  DisconnectReason
-} = require('@whiskeysockets/baileys');
-
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
 const pino = require('pino');
-const qrcode = require('qrcode-terminal');
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info');
@@ -37,14 +30,15 @@ async function startBot() {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      qrcode.generate(qr, { small: true });
+      console.log('📟 QR Code (scan):\n', qr);
     }
-
     if (connection === 'close') {
-      const reason = new Boom(lastDisconnect?.error).output?.statusCode;
-      if (reason !== DisconnectReason.loggedOut) {
-        startBot(); // reconnect
+      const status = new Boom(lastDisconnect?.error).output?.statusCode;
+      if (status !== DisconnectReason.loggedOut) {
+        startBot();
       }
+    } else if (connection === 'open') {
+      console.log('🟢 Connected!');
     }
   });
 }
