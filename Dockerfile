@@ -2,7 +2,9 @@ FROM node:18
 
 WORKDIR /app
 
-COPY package.json ./
+# Salin kedua file agar dependency terinstall dengan benar
+COPY package.json package-lock.json ./
+
 RUN npm install
 
 COPY . .
