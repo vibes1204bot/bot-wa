@@ -22,12 +22,17 @@ async function startBot() {
 
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect, qr } = update;
-    if (qr) qrcode.generate(qr, { small: true });
+
+    if (qr) {
+      console.log("🔑 QR code received, generating in terminal...");
+      qrcode.generate(qr, { small: true });
+    }
 
     if (connection === 'close') {
       const reason = new Boom(lastDisconnect?.error).output?.statusCode;
       if (reason !== DisconnectReason.loggedOut) {
-        startBot(); // reconnect
+        console.log("🔁 Reconnecting...");
+        startBot();
       }
     }
   });
