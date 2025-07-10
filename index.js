@@ -30,8 +30,8 @@ async function startBot() {
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update;
     if (connection === 'close') {
-      const statusCode = new Boom(lastDisconnect?.error).output?.statusCode;
-      if (statusCode !== DisconnectReason.loggedOut) {
+      const reason = new Boom(lastDisconnect?.error).output?.statusCode;
+      if (reason !== DisconnectReason.loggedOut) {
         startBot(); // reconnect
       }
     }
