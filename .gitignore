@@ -1,19 +1,2 @@
-# Node.js dependencies
 node_modules/
-
-# Baileys auth state
 auth_info/
-
-# Log files
-*.log
-
-# OS-specific files
-.DS_Store
-Thumbs.db
-
-# Environment config
-.env
-
-# Editor folders
-.vscode/
-.idea/
