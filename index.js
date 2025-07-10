@@ -1,17 +1,10 @@
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion,
-  DisconnectReason
-} = require('@whiskeysockets/baileys');
-
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
 const pino = require('pino');
-const fs = require('fs');
-const { Boom } = require('@hapi/boom'); // ✅ Tambahan yang sebelumnya hilang
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info');
-  const { version, isLatest } = await fetchLatestBaileysVersion();
+  const { version } = await fetchLatestBaileysVersion();
 
   const sock = makeWASocket({
     version,
@@ -22,7 +15,7 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+  sock.ev.on('messages.upsert', async ({ messages }) => {
     const msg = messages[0];
     if (!msg.message || msg.key.fromMe) return;
 
@@ -37,8 +30,8 @@ async function startBot() {
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update;
     if (connection === 'close') {
-      const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-      if (reason !== DisconnectReason.loggedOut) {
+      const statusCode = new Boom(lastDisconnect?.error).output?.statusCode;
+      if (statusCode !== DisconnectReason.loggedOut) {
         startBot(); // reconnect
       }
     }
