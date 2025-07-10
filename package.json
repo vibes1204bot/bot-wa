@@ -6,13 +6,8 @@
     "start": "node index.js"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@whiskeysockets/baileys": "^6.7.18",
     "@hapi/boom": "^10.0.1",
-=======
-    "@hapi/boom": "^10.0.0",
-    "@whiskeysockets/baileys": "^6.7.0",
->>>>>>> be0245f (Add session & update dependencies)
     "pino": "^8.0.0",
     "qrcode-terminal": "^0.12.0"
   }
